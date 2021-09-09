@@ -1,0 +1,41 @@
+resources:
+- name: repo
+  type: git
+  source:
+    uri: git@github.com:roerjo/concourse-test.git
+    branch: master
+    private_key: |
+      -----BEGIN OPENSSH PRIVATE KEY-----
+      ###
+      -----END OPENSSH PRIVATE KEY-----
+
+jobs:
+  - name: hello-world-job
+    plan:
+      - get: repo
+        trigger: true  
+      - task: create-commit
+        config:
+          platform: linux
+          image_resource:
+            type: registry-image
+            source:
+              repository: gitea/gitea
+          inputs:
+            - name: repo
+          outputs:
+            - name: repo
+          run:
+            path: sh
+            args: 
+              - -cx
+              - |
+                cd repo
+                date +%Y-%m-%d > todays-date
+                git add ./todays-date
+                git config user.name "Concourse"
+                git config user.email "test@test.com"
+                git commit -m "Update todays date"
+      - put: repo
+        params:
+          repository: repo
