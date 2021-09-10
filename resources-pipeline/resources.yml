@@ -1,3 +1,7 @@
+#####
+# This pipeline has a major flaw...it is circular. The put step will trigger the first get step.
+#####
+
 resources:
   - name: repo
     type: git
