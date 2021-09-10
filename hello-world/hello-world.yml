@@ -1,41 +1,21 @@
-resources:
-- name: repo
-  type: git
-  source:
-    uri: git@github.com:roerjo/concourse-test.git
-    branch: master
-    private_key: |
-      -----BEGIN OPENSSH PRIVATE KEY-----
-      ###
-      -----END OPENSSH PRIVATE KEY-----
-
 jobs:
-  - name: hello-world-job
-    plan:
-      - get: repo
-        trigger: true  
-      - task: create-commit
-        config:
-          platform: linux
-          image_resource:
-            type: registry-image
-            source:
-              repository: gitea/gitea
-          inputs:
-            - name: repo
-          outputs:
-            - name: repo
-          run:
-            path: sh
-            args: 
-              - -cx
-              - |
-                cd repo
-                date +%Y-%m-%d > todays-date
-                git add ./todays-date
-                git config user.name "Concourse"
-                git config user.email "test@test.com"
-                git commit -m "Update todays date"
-      - put: repo
-        params:
-          repository: repo
+- name: hello-world-job
+  plan:
+  - task: hello-world-task
+    config:
+      
+      # Tells Concourse which type of worker this task should run on
+      platform: linux
+        
+      # This is one way of telling Concourse which container image to use for a
+      # task. We'll explain this more when talking about resources
+      image_resource:
+        type: registry-image
+        source:
+          repository: busybox # images are pulled from docker hub by default
+
+      # The command Concourse will run inside the container
+      # echo "Hello world!"
+      run:
+        path: echo
+        args: ["Hello world!"]
